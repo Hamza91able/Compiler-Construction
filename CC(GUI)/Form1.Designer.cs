@@ -32,9 +32,11 @@
             this.codeText = new System.Windows.Forms.RichTextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.btnCmpl = new System.Windows.Forms.Button();
             this.tokenText = new System.Windows.Forms.RichTextBox();
+            this.btnCmpl = new System.Windows.Forms.Button();
+            this.errorRichTextbox = new System.Windows.Forms.RichTextBox();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -58,6 +60,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.errorRichTextbox);
             this.groupBox2.Location = new System.Drawing.Point(13, 568);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(790, 136);
@@ -75,6 +78,15 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Tokens";
             // 
+            // tokenText
+            // 
+            this.tokenText.Location = new System.Drawing.Point(7, 20);
+            this.tokenText.Name = "tokenText";
+            this.tokenText.ReadOnly = true;
+            this.tokenText.Size = new System.Drawing.Size(446, 522);
+            this.tokenText.TabIndex = 0;
+            this.tokenText.Text = "";
+            // 
             // btnCmpl
             // 
             this.btnCmpl.Location = new System.Drawing.Point(810, 577);
@@ -85,14 +97,14 @@
             this.btnCmpl.UseVisualStyleBackColor = true;
             this.btnCmpl.Click += new System.EventHandler(this.Button1_Click);
             // 
-            // tokenText
+            // errorRichTextbox
             // 
-            this.tokenText.Location = new System.Drawing.Point(7, 20);
-            this.tokenText.Name = "tokenText";
-            this.tokenText.ReadOnly = true;
-            this.tokenText.Size = new System.Drawing.Size(446, 522);
-            this.tokenText.TabIndex = 0;
-            this.tokenText.Text = "";
+            this.errorRichTextbox.Location = new System.Drawing.Point(7, 20);
+            this.errorRichTextbox.Name = "errorRichTextbox";
+            this.errorRichTextbox.ReadOnly = true;
+            this.errorRichTextbox.Size = new System.Drawing.Size(777, 110);
+            this.errorRichTextbox.TabIndex = 0;
+            this.errorRichTextbox.Text = "";
             // 
             // WndMain
             // 
@@ -109,6 +121,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Compiler Construction";
             this.groupBox1.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -122,6 +135,7 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Button btnCmpl;
         private System.Windows.Forms.RichTextBox tokenText;
+        private System.Windows.Forms.RichTextBox errorRichTextbox;
     }
 }
 

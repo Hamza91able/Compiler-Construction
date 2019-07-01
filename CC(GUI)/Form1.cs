@@ -214,6 +214,7 @@ namespace CC_GUI_
             consoleMethods.Add("Console.WriteLine", "");
 
         }
+
         public WndMain()
         {
             InitializeComponent();
@@ -227,114 +228,130 @@ namespace CC_GUI_
         private void Tokenization()
         {
             string statement = codeText.Text;
+            var lines = statement.Split('\n');
 
-            Regex testRegex = new Regex(@",(?!\d\d\d(?!\d)|\s)");
+            List<string[]> tokens = new List<string[]>();
 
-            var tokens = statement.Split(' ');
-
-            foreach (var token in tokens)
+            foreach (var token in lines)
             {
+                tokens.Add(token.Split(' '));
+            }
 
-                if (keywords.ContainsKey(token))
-                {
-                    if (token.Contains(";"))
-                    {
-                        tokenText.AppendText($"<keyword>, {token.Split(';')[0]}>");
-                        tokenText.AppendText("<terminal, ;>\n");
-                    }
-                    else
-                    {
-                        tokenText.AppendText($"<keyword, {token}>\n");
-                    }
+            int jStarter = 0;
+            var lineBreaker = 0;
 
-                }
-                else if (operators.ContainsKey(token))
+            for (var i = 0; i < tokens.Count; i++)
+            {
+                for (var k = 0; k < tokens[i].Length; k++)
                 {
-                    if (token.Contains(";"))
+                    if (tokens[i][k] == ";")
                     {
-                        tokenText.AppendText($"<Operators>, {token.Split(';')[0]}>\n");
-                        tokenText.AppendText("<terminal, ;>\n");
-                    }
-                    else
-                    {
-                        tokenText.AppendText($"<Operators, {token}>\n");
-                    }
-                }
-                else if (dataTypes.ContainsKey(token))
-                {
-                    if (token.Contains(";"))
-                    {
-                        tokenText.AppendText($"<DataTypes>, {token.Split(';')[0]}>\n");
-                        tokenText.AppendText($"<DataTypes>, {token.Split(';')[0]}>\n");
-                    }
-                    else
-                    {
-                        tokenText.AppendText($"<DataTypes, {token}>\n");
-                    }
-                }
-                else if (symbols.ContainsKey(token))
-                {
-                    if (token.Contains(";"))
-                    {
-                        tokenText.AppendText($"<Symbol>, {token.Split(';')[0]}>\n");
-                        tokenText.AppendText("<terminal, ;>\n");
-                    }
-                    else
-                    {
-                        tokenText.AppendText($"<Symbol, {token}>\n");
-                    }
-                }
-                else if (consoleMethods.ContainsKey(token))
-                {
-                    if (token.Contains(";"))
-                    {
-                        tokenText.AppendText($"<Method/Function>, {token}>\n");
-                        tokenText.AppendText("<terminal, ;>\n");
-                    }
-                    else
-                    {
-                        tokenText.AppendText($"<Method/Function, {token}>\n");
-                    }
-                }
-                else
-                {
-                    if (token.Contains(';'))
-                    {
-                        var getType = CheckDataType(token.Split(';')[0]);
-                        tokenText.AppendText($"{getType}\n");
-                        tokenText.AppendText("<terminal, ;>\n");
-                    }
-                    else
-                    {
-                        var getType = CheckDataType(token);
-                        if (getType != null)
+                        lineBreaker = k;
+                        for (var j = jStarter; j <= lineBreaker; j++)
                         {
-                            if (token.Contains(";"))
+                            if (keywords.ContainsKey(tokens[i][j]))
                             {
-                                tokenText.AppendText($"<{getType}, {token.Split(';')[0]}>\n");
-                                tokenText.AppendText($"<{getType}, {token.Split(';')[0]}>\n");
+                                if (tokens[i][j].Contains(";"))
+                                {
+                                    tokenText.AppendText($"<keyword>, {tokens[i][j].Split(';')[0]}>");
+                                    tokenText.AppendText("<terminal, ;>\n");
+                                }
+                                else
+                                {
+                                    tokenText.AppendText($"<keyword, {tokens[i][j]}>\n");
+                                }
+
+                            }
+                            else if (operators.ContainsKey(tokens[i][j]))
+                            {
+                                if (tokens[i][j].Contains(";"))
+                                {
+                                    tokenText.AppendText($"<Operators>, {tokens[i][j].Split(';')[0]}>\n");
+                                    tokenText.AppendText("<terminal, ;>\n");
+                                }
+                                else
+                                {
+                                    tokenText.AppendText($"<Operators, {tokens[i][j]}>\n");
+                                }
+                            }
+                            else if (dataTypes.ContainsKey(tokens[i][j]))
+                            {
+                                if (tokens[i][j].Contains(";"))
+                                {
+                                    tokenText.AppendText($"<DataTypes>, {tokens[i][j].Split(';')[0]}>\n");
+                                    tokenText.AppendText($"<DataTypes>, {tokens[i][j].Split(';')[0]}>\n");
+                                }
+                                else
+                                {
+                                    tokenText.AppendText($"<DataTypes, {tokens[i][j]}>\n");
+                                }
+                            }
+                            else if (symbols.ContainsKey(tokens[i][j]))
+                            {
+                                if (tokens[i][j].Contains(";"))
+                                {
+                                    tokenText.AppendText($"<Symbol>, {tokens[i][j].Split(';')[0]}>\n");
+                                    tokenText.AppendText("<terminal, ;>\n");
+                                }
+                                else
+                                {
+                                    tokenText.AppendText($"<Symbol, {tokens[j]}>\n");
+                                }
+                            }
+                            else if (consoleMethods.ContainsKey(tokens[i][j]))
+                            {
+                                if (tokens[i][j].Contains(";"))
+                                {
+                                    tokenText.AppendText($"<Method/Function>, {tokens[i][j]}>\n");
+                                    tokenText.AppendText("<terminal, ;>\n");
+                                }
+                                else
+                                {
+                                    tokenText.AppendText($"<Method/Function, {tokens[i][j]}>\n");
+                                }
                             }
                             else
                             {
-                                tokenText.AppendText($"{getType}\n");
+                                if (tokens[i][j].Contains(';'))
+                                {
+                                    var getType = CheckDataType(tokens[i][j].Split(';')[0]);
+                                    tokenText.AppendText($"{getType}\n");
+                                    tokenText.AppendText("<terminal, ;>\n");
+                                }
+                                else
+                                {
+                                    var getType = CheckDataType(tokens[i][j]);
+                                    if (getType != null)
+                                    {
+                                        if (tokens[i][j].Contains(";"))
+                                        {
+                                            tokenText.AppendText($"<{getType}, {tokens[i][j].Split(';')[0]}>\n");
+                                            tokenText.AppendText($"<{getType}, {tokens[i][j].Split(';')[0]}>\n");
+                                        }
+                                        else
+                                        {
+                                            tokenText.AppendText($"{getType}\n");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (tokens[i][j].Contains(";"))
+                                        {
+                                            tokenText.AppendText($"<Variable, {tokens[i][j].Split(';')[0]}>\n");
+                                            tokenText.AppendText("<terminal, ;>\n");
+                                        }
+                                        else
+                                        {
+                                            tokenText.AppendText($"<Variable, {tokens[i][j]}>\n");
+                                        }
+                                    }
+                                }
                             }
                         }
-                        else
-                        {
-                            if (token.Contains(";"))
-                            {
-                                tokenText.AppendText($"<Variable, {token.Split(';')[0]}>\n");
-                                tokenText.AppendText("<terminal, ;>\n");
-                            }
-                            else
-                            {
-                                tokenText.AppendText($"<Variable, {token}>\n");
-                            }
-                        }
+                        jStarter = i;
                     }
                 }
             }
-
         }
 
         private string CheckDataType(string input)
@@ -369,9 +386,198 @@ namespace CC_GUI_
             return result;
         }
 
+        private void SyntaxAnalysis()
+        {
+            // Case Initialization
+            // datatype variable operator value
+            string statement = codeText.Text;
+            var lines = statement.Split('\n');
+
+            List<string[]> tokens = new List<string[]>();
+
+            foreach (var token in lines)
+            {
+                tokens.Add(token.Split(' '));
+            }
+
+            int jStarter = 0;
+
+            for (var i = 0; i < tokens.Count; i++)
+            {
+                for (var k = 0; k < tokens[i].Length; k++)
+                {
+                    if (tokens[i][k] == ";")
+                    {
+                        int lineBreaker = k;
+                        for (var j = jStarter; j <= lineBreaker; j++)
+                        {
+                            if (dataTypes.ContainsKey(tokens[i][j]))
+                            {
+                                j++;
+                            }
+                            else
+                            {
+                                errorRichTextbox.AppendText($"Error in Line : Expected a datatype\n");
+                                j++;
+                            }
+                            if (!dataTypes.ContainsKey(tokens[i][j]) && !keywords.ContainsKey(tokens[i][j]) && !symbols.ContainsKey(tokens[i][j]) && !consoleMethods.ContainsKey(tokens[i][j]))
+                            {
+                                j++;
+                            }
+                            else
+                            {
+                                errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
+                                j++;
+                            }
+                            if (operators.ContainsKey(tokens[i][j]))
+                            {
+                                j++;
+                            }
+                            else
+                            {
+                                errorRichTextbox.AppendText("Error in Line{#}: Expected an operator");
+                                j++;
+                            }
+                        }
+                        jStarter = i;
+                    }
+                }
+            }
+
+            /*  for (var i = 0; i < tokens.Length; i++)
+              {
+                  if (tokens[i] == ";")
+                  {
+                      lineBreaker = i;
+                      for (var j = jStarter; j < lineBreaker; j++)
+                      {
+                          if (dataTypes.ContainsKey(tokens[j]))
+                          {
+                              j++;
+                          } 
+                          else
+                          {
+                              errorRichTextbox.AppendText($"Error in Line : Expected a datatype\n");
+                              j++;
+                          }
+                          if (!dataTypes.ContainsKey(tokens[j]) && !keywords.ContainsKey(tokens[j]) && !symbols.ContainsKey(tokens[j]) && !consoleMethods.ContainsKey(tokens[j]))
+                          {
+                              j++;
+                          }
+                          else
+                          {
+                              errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
+                              j++;
+                          }
+                          if (operators.ContainsKey(tokens[j]))
+                          {
+                              j++;
+                          }
+                          else
+                          {
+                              errorRichTextbox.AppendText("Error in Line{#}: Expected an operator");
+                              j++;
+                          }
+                      }
+                      jStarter = i;
+                  }
+              }*/
+
+
+            /*if (!dataTypes.ContainsKey(tokens[0]) && !keywords.ContainsKey(tokens[0]) && !symbols.ContainsKey(tokens[0]) && !consoleMethods.ContainsKey(tokens[0]))
+            {
+                errorRichTextbox.AppendText($" Error in Line: The type or namespace '{tokens[0]}' could not be found ");
+            }
+
+            // Initilization
+            if (dataTypes.ContainsKey(tokens[0]))
+            {
+                try
+                {
+                    if (!dataTypes.ContainsKey(tokens[0]))
+                    {
+                        errorRichTextbox.AppendText("Error in Line{#}: Expected a datatype\n");
+                    }
+                    if (dataTypes.ContainsKey(tokens[1]) || keywords.ContainsKey(tokens[1]) || symbols.ContainsKey(tokens[1]) || consoleMethods.ContainsKey(tokens[1]))
+                    {
+                        errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
+                    }
+                    if (!operators.ContainsKey(tokens[2]))
+                    {
+                        errorRichTextbox.AppendText("Error in Line{#}: Expected an operator");
+                    }
+                    if (dataTypes.ContainsKey(tokens[3]) || keywords.ContainsKey(tokens[3]) || symbols.ContainsKey(tokens[3]) || consoleMethods.ContainsKey(tokens[3]))
+                    {
+                        errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
+                    }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
+                    MessageBox.Show("Error in Line{#}: Invalid Expression Term");
+                }
+            }
+
+            // If
+            if (tokens[0] == "if" || tokens[0] == "If" || tokens[0] == "IF")
+            {
+                try
+                {
+                    var endCurlyBraces = tokens[tokens.Length - 1];
+
+                    if (tokens[1] != "(")
+                    {
+                        errorRichTextbox.AppendText("Error in Line{#}: Expected (\n");
+                    }
+                    if (operators.ContainsKey(tokens[2]))
+                    {
+                        errorRichTextbox.AppendText("Error in Line{#}: Invalid Condition\n");
+                    }
+                    if (tokens[3] != ")")
+                    {
+                        errorRichTextbox.AppendText("Error in Line{#}: Expected )\n");
+                    }
+                    if (tokens[4] != "{")
+                    {
+                        errorRichTextbox.AppendText("Error in Line{#}: Expected {\n");
+                    }
+                    if (endCurlyBraces != "}")
+                    {
+                        errorRichTextbox.AppendText("Error in Line{#}:asdf Expected }\n");
+                    }
+                    if (dataTypes.ContainsKey(tokens[5]))
+                    {
+                        if (!dataTypes.ContainsKey(tokens[5]))
+                        {
+                            errorRichTextbox.AppendText("Error in Line{#}: Expected a datatype\n");
+                        }
+                        if (dataTypes.ContainsKey(tokens[6]) || keywords.ContainsKey(tokens[6]) || symbols.ContainsKey(tokens[6]) || consoleMethods.ContainsKey(tokens[6]))
+                        {
+                            errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
+                        }
+                        if (!operators.ContainsKey(tokens[7]))
+                        {
+                            errorRichTextbox.AppendText("Error in Line{#}: Expected an operator");
+                        }
+                        if (dataTypes.ContainsKey(tokens[8]) || keywords.ContainsKey(tokens[8]) || symbols.ContainsKey(tokens[8]) || consoleMethods.ContainsKey(tokens[8]))
+                        {
+                            errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
+                }
+
+            }*/
+        }
+
         private void Button1_Click(object sender, EventArgs e)
         {
             tokenText.Text = "";
+            errorRichTextbox.Text = "";
+            SyntaxAnalysis();
             Tokenization();
         }
     }
