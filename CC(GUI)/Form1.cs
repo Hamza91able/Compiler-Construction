@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace CC_GUI_
 {
@@ -215,6 +216,53 @@ namespace CC_GUI_
 
         }
 
+        public int getWidth()
+        {
+            int w = 25;
+            // get total lines of richTextBox1    
+            int line = codeText.Lines.Length;
+
+            if (line <= 99)
+            {
+                w = 20 + (int)codeText.Font.Size;
+            }
+            else if (line <= 999)
+            {
+                w = 30 + (int)codeText.Font.Size;
+            }
+            else
+            {
+                w = 50 + (int)codeText.Font.Size;
+            }
+
+            return w;
+        }
+
+        public void AddLineNumbers()
+        {
+            // create & set Point pt to (0,0)    
+            Point pt = new Point(0, 0);
+            // get First Index & First Line from richTextBox1    
+            int First_Index = codeText.GetCharIndexFromPosition(pt);
+            int First_Line = codeText.GetLineFromCharIndex(First_Index);
+            // set X & Y coordinates of Point pt to ClientRectangle Width & Height respectively    
+            pt.X = ClientRectangle.Width;
+            pt.Y = ClientRectangle.Height;
+            // get Last Index & Last Line from richTextBox1    
+            int Last_Index = codeText.GetCharIndexFromPosition(pt);
+            int Last_Line = codeText.GetLineFromCharIndex(Last_Index);
+            // set Center alignment to LineNumberTextBox    
+            LineNumberTextBox.SelectionAlignment = HorizontalAlignment.Center;
+            // set LineNumberTextBox text to null & width to getWidth() function value    
+            LineNumberTextBox.Text = "";
+            LineNumberTextBox.Width = getWidth();
+            // now add each line number to LineNumberTextBox upto last line    
+            for (int i = First_Line; i <= Last_Line + 1; i++)
+            {
+                LineNumberTextBox.Text += i + 1 + "\n";
+            }
+        }
+
         public WndMain()
         {
             InitializeComponent();
@@ -240,12 +288,17 @@ namespace CC_GUI_
             int jStarter = 0;
             var lineBreaker = 0;
 
+            bool terminatorError = false;
+            int lineNo = 0;
+
             for (var i = 0; i < tokens.Count; i++)
             {
                 for (var k = 0; k < tokens[i].Length; k++)
                 {
                     if (tokens[i][k] == ";")
                     {
+                        terminatorError = false;
+                        lineNo = 0;
                         lineBreaker = k;
                         for (var j = jStarter; j <= lineBreaker; j++)
                         {
@@ -295,7 +348,7 @@ namespace CC_GUI_
                                 }
                                 else
                                 {
-                                    tokenText.AppendText($"<Symbol, {tokens[j]}>\n");
+                                    tokenText.AppendText($"<Symbol, {tokens[i][j]}>\n");
                                 }
                             }
                             else if (consoleMethods.ContainsKey(tokens[i][j]))
@@ -350,7 +403,16 @@ namespace CC_GUI_
                         }
                         jStarter = i;
                     }
+                    else
+                    {
+                        terminatorError = true;
+                        lineNo = i;
+                    }
                 }
+            }
+            if (terminatorError)
+            {
+                errorRichTextbox.AppendText($"Error in Line {lineNo + 1}: Missing Terminatior ';' \n");
             }
         }
 
@@ -388,8 +450,6 @@ namespace CC_GUI_
 
         private void SyntaxAnalysis()
         {
-            // Case Initialization
-            // datatype variable operator value
             string statement = codeText.Text;
             var lines = statement.Split('\n');
 
@@ -401,184 +461,129 @@ namespace CC_GUI_
             }
 
             int jStarter = 0;
+            int errorCorrection = 0;
 
-            for (var i = 0; i < tokens.Count; i++)
+            try
             {
-                for (var k = 0; k < tokens[i].Length; k++)
+                for (var i = 0; i < tokens.Count; i++)
                 {
-                    if (tokens[i][k] == ";")
+                    for (var k = 0; k < tokens[i].Length; k++)
                     {
-                        int lineBreaker = k;
-                        for (var j = jStarter; j <= lineBreaker; j++)
+                        //MessageBox.Show(tokens[i][k]);
+                        if (tokens[i][k] == ";")
                         {
-                            if (dataTypes.ContainsKey(tokens[i][j]))
+                            int lineBreaker = k;
+                            for (var j = jStarter; j < lineBreaker; j++)
                             {
-                                j++;
+                                if (i > 1)
+                                {
+                                    errorCorrection++;
+                                }
+                                if (j >= lineBreaker)
+                                {
+                                    break;
+                                }
+                                //Initialization Error Detection.
+                                if (dataTypes.ContainsKey(tokens[i][j - errorCorrection]))
+                                {
+                                    j++;
+                                }
+                                else
+                                {
+                                    errorRichTextbox.AppendText($"Error in Line {i + 1}: Expected a datatype\n");
+                                    j++;
+                                }
+                                if (!dataTypes.ContainsKey(tokens[i][j - errorCorrection]) && !keywords.ContainsKey(tokens[i][j - errorCorrection]) && !symbols.ContainsKey(tokens[i][j - errorCorrection]) && !consoleMethods.ContainsKey(tokens[i][j - errorCorrection]))
+                                {
+                                    j++;
+                                }
+                                else
+                                {
+                                    errorRichTextbox.AppendText($"Error in Line {i + 1}: Expected a variable\n");
+                                    j++;
+                                }
+                                if (operators.ContainsKey(tokens[i][j - errorCorrection]))
+                                {
+                                    j++;
+                                }
+                                else
+                                {
+                                    errorRichTextbox.AppendText($"Error in Line {i + 1}: Expected an operator\n");
+                                    j++;
+                                }
                             }
-                            else
-                            {
-                                errorRichTextbox.AppendText($"Error in Line : Expected a datatype\n");
-                                j++;
-                            }
-                            if (!dataTypes.ContainsKey(tokens[i][j]) && !keywords.ContainsKey(tokens[i][j]) && !symbols.ContainsKey(tokens[i][j]) && !consoleMethods.ContainsKey(tokens[i][j]))
-                            {
-                                j++;
-                            }
-                            else
-                            {
-                                errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
-                                j++;
-                            }
-                            if (operators.ContainsKey(tokens[i][j]))
-                            {
-                                j++;
-                            }
-                            else
-                            {
-                                errorRichTextbox.AppendText("Error in Line{#}: Expected an operator");
-                                j++;
-                            }
+                            jStarter = i;
                         }
-                        jStarter = i;
                     }
                 }
             }
-
-            /*  for (var i = 0; i < tokens.Length; i++)
-              {
-                  if (tokens[i] == ";")
-                  {
-                      lineBreaker = i;
-                      for (var j = jStarter; j < lineBreaker; j++)
-                      {
-                          if (dataTypes.ContainsKey(tokens[j]))
-                          {
-                              j++;
-                          } 
-                          else
-                          {
-                              errorRichTextbox.AppendText($"Error in Line : Expected a datatype\n");
-                              j++;
-                          }
-                          if (!dataTypes.ContainsKey(tokens[j]) && !keywords.ContainsKey(tokens[j]) && !symbols.ContainsKey(tokens[j]) && !consoleMethods.ContainsKey(tokens[j]))
-                          {
-                              j++;
-                          }
-                          else
-                          {
-                              errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
-                              j++;
-                          }
-                          if (operators.ContainsKey(tokens[j]))
-                          {
-                              j++;
-                          }
-                          else
-                          {
-                              errorRichTextbox.AppendText("Error in Line{#}: Expected an operator");
-                              j++;
-                          }
-                      }
-                      jStarter = i;
-                  }
-              }*/
-
-
-            /*if (!dataTypes.ContainsKey(tokens[0]) && !keywords.ContainsKey(tokens[0]) && !symbols.ContainsKey(tokens[0]) && !consoleMethods.ContainsKey(tokens[0]))
+            catch (Exception)
             {
-                errorRichTextbox.AppendText($" Error in Line: The type or namespace '{tokens[0]}' could not be found ");
+                errorRichTextbox.AppendText("Syntax Error");
             }
 
-            // Initilization
-            if (dataTypes.ContainsKey(tokens[0]))
-            {
-                try
-                {
-                    if (!dataTypes.ContainsKey(tokens[0]))
-                    {
-                        errorRichTextbox.AppendText("Error in Line{#}: Expected a datatype\n");
-                    }
-                    if (dataTypes.ContainsKey(tokens[1]) || keywords.ContainsKey(tokens[1]) || symbols.ContainsKey(tokens[1]) || consoleMethods.ContainsKey(tokens[1]))
-                    {
-                        errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
-                    }
-                    if (!operators.ContainsKey(tokens[2]))
-                    {
-                        errorRichTextbox.AppendText("Error in Line{#}: Expected an operator");
-                    }
-                    if (dataTypes.ContainsKey(tokens[3]) || keywords.ContainsKey(tokens[3]) || symbols.ContainsKey(tokens[3]) || consoleMethods.ContainsKey(tokens[3]))
-                    {
-                        errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
-                    }
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.ToString());
-                    MessageBox.Show("Error in Line{#}: Invalid Expression Term");
-                }
-            }
-
-            // If
-            if (tokens[0] == "if" || tokens[0] == "If" || tokens[0] == "IF")
-            {
-                try
-                {
-                    var endCurlyBraces = tokens[tokens.Length - 1];
-
-                    if (tokens[1] != "(")
-                    {
-                        errorRichTextbox.AppendText("Error in Line{#}: Expected (\n");
-                    }
-                    if (operators.ContainsKey(tokens[2]))
-                    {
-                        errorRichTextbox.AppendText("Error in Line{#}: Invalid Condition\n");
-                    }
-                    if (tokens[3] != ")")
-                    {
-                        errorRichTextbox.AppendText("Error in Line{#}: Expected )\n");
-                    }
-                    if (tokens[4] != "{")
-                    {
-                        errorRichTextbox.AppendText("Error in Line{#}: Expected {\n");
-                    }
-                    if (endCurlyBraces != "}")
-                    {
-                        errorRichTextbox.AppendText("Error in Line{#}:asdf Expected }\n");
-                    }
-                    if (dataTypes.ContainsKey(tokens[5]))
-                    {
-                        if (!dataTypes.ContainsKey(tokens[5]))
-                        {
-                            errorRichTextbox.AppendText("Error in Line{#}: Expected a datatype\n");
-                        }
-                        if (dataTypes.ContainsKey(tokens[6]) || keywords.ContainsKey(tokens[6]) || symbols.ContainsKey(tokens[6]) || consoleMethods.ContainsKey(tokens[6]))
-                        {
-                            errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
-                        }
-                        if (!operators.ContainsKey(tokens[7]))
-                        {
-                            errorRichTextbox.AppendText("Error in Line{#}: Expected an operator");
-                        }
-                        if (dataTypes.ContainsKey(tokens[8]) || keywords.ContainsKey(tokens[8]) || symbols.ContainsKey(tokens[8]) || consoleMethods.ContainsKey(tokens[8]))
-                        {
-                            errorRichTextbox.AppendText("Error in Line{#}: Expected a variable\n");
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.ToString());
-                }
-
-            }*/
         }
 
         private void Button1_Click(object sender, EventArgs e)
         {
             tokenText.Text = "";
             errorRichTextbox.Text = "";
-            SyntaxAnalysis();
             Tokenization();
+            SyntaxAnalysis();
+            tokenText.Text = Regex.Replace(tokenText.Text, @"^\s*$(\n|\r|\r\n)", "", RegexOptions.Multiline);
+        }
+
+        private void WndMain_Load(object sender, EventArgs e)
+        {
+            ToolTip ToolTip1 = new ToolTip();
+            ToolTip1.SetToolTip(this.OpenFileButton, "Open File");
+            ToolTip1.SetToolTip(this.NewFileButton, "New File");
+            ToolTip1.SetToolTip(this.SaveFileButton, "Save File");
+            AddLineNumbers();
+        }
+
+        private void CodeText_SelectionChanged(object sender, EventArgs e)
+        {
+            Point pt = codeText.GetPositionFromCharIndex(codeText.SelectionStart);
+            if (pt.X == 1)
+            {
+                AddLineNumbers();
+            }
+        }
+
+        private void CodeText_VScroll(object sender, EventArgs e)
+        {
+            LineNumberTextBox.Text = "";
+            AddLineNumbers();
+            LineNumberTextBox.Invalidate();
+        }
+
+        private void CodeText_TextChanged(object sender, EventArgs e)
+        {
+            if (codeText.Text == "")
+            {
+                AddLineNumbers();
+            }
+        }
+
+        private void CodeText_FontChanged(object sender, EventArgs e)
+        {
+            LineNumberTextBox.Font = codeText.Font;
+            codeText.Select();
+            AddLineNumbers();
+        }
+
+        private void LineNumberTextBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            codeText.Select();
+            LineNumberTextBox.DeselectAll();
+        }
+
+        private void NewFileButton_Click(object sender, EventArgs e)
+        {
+            codeText.Text = "";
+            errorRichTextbox.Text = "";
+            tokenText.Text = "";
         }
     }
 }
