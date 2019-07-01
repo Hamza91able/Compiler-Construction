@@ -585,5 +585,47 @@ namespace CC_GUI_
             errorRichTextbox.Text = "";
             tokenText.Text = "";
         }
+
+        private void OpenFileButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog
+            {
+                Title = "Browse Text Files",
+
+                CheckFileExists = true,
+                CheckPathExists = true,
+
+                DefaultExt = "txt",
+                Filter = "txt files (*.txt)|*.txt",
+                FilterIndex = 2,
+                RestoreDirectory = true,
+
+                ReadOnlyChecked = true,
+                ShowReadOnly = true
+            };
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                using (var streamReader = new StreamReader(openFileDialog1.FileName, Encoding.UTF8))
+                {
+                    codeText.AppendText(streamReader.ReadToEnd());
+                }
+            }
+        }
+
+        private void SaveFileButton_Click(object sender, EventArgs e)
+        {
+            using (var sfd = new SaveFileDialog())
+            {
+                sfd.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+                sfd.FilterIndex = 2;
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    File.WriteAllText(sfd.FileName + ".txt", codeText.Text);
+                    MessageBox.Show("FIle Saved");
+                }
+            }
+        }
     }
 }

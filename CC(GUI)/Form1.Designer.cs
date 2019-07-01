@@ -61,12 +61,17 @@
             // codeText
             // 
             this.codeText.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.codeText.Dock = System.Windows.Forms.DockStyle.Right;
             this.codeText.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.codeText.Location = new System.Drawing.Point(60, 16);
+            this.codeText.Location = new System.Drawing.Point(33, 16);
             this.codeText.Name = "codeText";
-            this.codeText.Size = new System.Drawing.Size(721, 460);
+            this.codeText.Size = new System.Drawing.Size(754, 460);
             this.codeText.TabIndex = 0;
             this.codeText.Text = "";
+            this.codeText.SelectionChanged += new System.EventHandler(this.CodeText_SelectionChanged);
+            this.codeText.VScroll += new System.EventHandler(this.CodeText_VScroll);
+            this.codeText.FontChanged += new System.EventHandler(this.CodeText_FontChanged);
+            this.codeText.TextChanged += new System.EventHandler(this.CodeText_TextChanged);
             // 
             // groupBox2
             // 
@@ -138,6 +143,7 @@
             this.OpenFileButton.TabIndex = 3;
             this.OpenFileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.OpenFileButton.UseVisualStyleBackColor = true;
+            this.OpenFileButton.Click += new System.EventHandler(this.OpenFileButton_Click);
             // 
             // SaveFileButton
             // 
@@ -147,6 +153,7 @@
             this.SaveFileButton.Size = new System.Drawing.Size(47, 46);
             this.SaveFileButton.TabIndex = 1;
             this.SaveFileButton.UseVisualStyleBackColor = true;
+            this.SaveFileButton.Click += new System.EventHandler(this.SaveFileButton_Click);
             // 
             // NewFileButton
             // 
@@ -157,6 +164,7 @@
             this.NewFileButton.Size = new System.Drawing.Size(47, 46);
             this.NewFileButton.TabIndex = 0;
             this.NewFileButton.UseVisualStyleBackColor = true;
+            this.NewFileButton.Click += new System.EventHandler(this.NewFileButton_Click);
             // 
             // LineNumberTextBox
             // 
@@ -164,7 +172,7 @@
             this.LineNumberTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.LineNumberTextBox.Cursor = System.Windows.Forms.Cursors.PanNE;
             this.LineNumberTextBox.Dock = System.Windows.Forms.DockStyle.Left;
-            this.LineNumberTextBox.Enabled = false;
+            this.LineNumberTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LineNumberTextBox.ForeColor = System.Drawing.Color.Black;
             this.LineNumberTextBox.Location = new System.Drawing.Point(3, 16);
             this.LineNumberTextBox.Name = "LineNumberTextBox";
@@ -189,6 +197,7 @@
             this.Name = "WndMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Compiler Construction";
+            this.Load += new System.EventHandler(this.WndMain_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
